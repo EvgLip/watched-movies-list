@@ -1,9 +1,8 @@
 // компонент Поиск
 import { useState } from "react";
 
-export default function Search ()
+export default function Search ({ query, setQuery })
 {
-  const [query, setQuery] = useState("");
 
   return (
     <input
