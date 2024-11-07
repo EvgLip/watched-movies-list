@@ -13,8 +13,9 @@ import { tempWatchedData } from '../data/tempWatchedData';
 import Loader from "./Loader";
 import ErrorMassage from "./ErrorMassage";
 import MovieDetails from "./MovieDetails";
+import { KEY } from "../data/key";
 
-const KEY = "3c71ac3c";
+
 
 export default function App ()
 {
@@ -25,9 +26,14 @@ export default function App ()
   const [error, setError] = useState('');
   const [selectedId, setSelectedId] = useState('');
 
-  function handleOnSelectMovie (movie)
+  function handleOnSelectMovie (id)
   {
-    selectedId(movie.imdbID);
+    setSelectedId(curId => curId === id ? null : id);
+  }
+
+  function handleOnClearDetails ()
+  {
+    setSelectedId(null);
   }
 
   useEffect(
@@ -65,8 +71,8 @@ export default function App ()
         return;
       }
       fetcMovies();
-    }
-    , [query]);
+
+    }, [query]);
 
   return (
     <>
@@ -76,19 +82,22 @@ export default function App ()
       </NavBar>
 
       <Main>
-        <Box>
+        <Box classExt="btn-left">
           {isLoading && <Loader />}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && <MovieList
+            movies={movies}
+            onSelectedMovie={handleOnSelectMovie} />}
           {error && <ErrorMassage massage={error} />}
-
         </Box>
 
         <Box>
           {
             selectedId
-              ? <MovieDetails selectedid={selectedId} />
-              :
-              <>
+              ? <MovieDetails
+                selectedId={selectedId}
+                onClearDetails={handleOnClearDetails}
+              />
+              : <>
                 <WatchedSummary watched={watched} />
                 <WatchedMoviesList watched={watched} />
               </>

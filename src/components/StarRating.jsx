@@ -28,6 +28,7 @@ StarRating.propTypes = {
 // закрашенный звезд при инициализации компонента
 // color - цвет звезд и текста по умолчанию #fcc419
 // className - по умолчанию ''
+// size - размер звезд и текста
 // massage - массив словестных оценок, кол-во слов-оценок
 // должно соответствовать кол-ву звезд (maxRating),
 // в противном случае massage будет игнорироваться
@@ -58,6 +59,7 @@ export default function StarRating (
   function handleOnRating (rating)
   {
     setRating(rating);
+    if (!onChangeReting) return;
     onChangeReting(rating);
   }
 
