@@ -14,6 +14,9 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
   const [error, setError] = useState('');
   const [rating, setRating] = useState(0);
 
+  const isWatched = watched.some(cur => cur.imdbID === selectedId);
+  const watchedUserRating = watched.find(movie => movie.imdbID === selectedId)?.userRating;
+
   const {
     Title,
     Year,
@@ -58,6 +61,20 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
 
   }, [selectedId]);
 
+  useEffect(
+    function ()
+    {
+      if (!Title) return;
+      document.title = `Movie | ${Title}`;
+
+      return function ()
+      {
+        document.title = 'Use Popcorn';
+        console.log('cleaner ', Title);
+      };
+    }, [Title]
+  );
+
   function handlOnAddWatched ()
   {
     const newWatchedMovie = {
@@ -65,19 +82,16 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
       Title,
       Year,
       Poster,
-      Runtime: Number(Runtime.split(' ').at(0)),
-      imdbRating: Number(imdbRating),
+      Runtime: Runtime.split(' ').at(0),
+      imdbRating: imdbRating,
       userRating: rating,
     };
+    console.log(newWatchedMovie);
 
     onAddWatched(newWatchedMovie);
     onClearDetails();
   }
 
-  function hendleDefaultRating ()
-  {
-    return watched.find(curWatched => curWatched.imdbID === selectedId)?.userRating ?? 0;
-  }
 
   return (
     <div className="details">
@@ -105,24 +119,28 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
 
           <section>
             <div className="rating">
-              <StarRating
-                maxRating={10}
-                defaultRating={hendleDefaultRating}
-                size={22}
-                onChangeReting={setRating}
-              />
-              {
-                rating > 0 &&
-                <button
-                  className="btn-add"
-                  onClick={handlOnAddWatched}
-                >
-                  + Add to list
-                </button>
+              {!isWatched
+                ? <>
+                  <StarRating
+                    maxRating={10}
+                    size={22}
+                    onChangeReting={setRating}
+                  />
+                  {
+                    rating > 0 &&
+                    <button
+                      className="btn-add"
+                      onClick={handlOnAddWatched}
+                    >
+                      + Add to list
+                    </button>
+                  }
+                </>
+                : <p>You rated with movie {watchedUserRating} <span>🌟</span></p>
               }
             </div>
-            <p><em>{Plot}</em></p>
-            <p>Starring {Actors}</p>
+            <p>Plot:   <em>{Plot}</em></p>
+            <p>Starring:   {Actors}</p>
             <p>Directed by {Director}</p>
           </section>
         </>

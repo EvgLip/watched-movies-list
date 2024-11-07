@@ -1,6 +1,7 @@
 // компонент WatchedMovie
+import { RxCross1 } from "react-icons/rx";
 
-export default function WatchedMovie ({ movie })
+export default function WatchedMovie ({ movie, onDeleteWatched })
 {
   return (
     <li>
@@ -17,8 +18,15 @@ export default function WatchedMovie ({ movie })
         </p>
         <p>
           <span>⏳</span>
-          <span>{movie.runtime} min</span>
+          <span>{movie.Runtime} min</span>
         </p>
+
+        <button
+          className="btn-delete"
+          onClick={() => onDeleteWatched(movie.imdbID)}
+        >
+          <RxCross1 />
+        </button>
       </div>
     </li>
   );

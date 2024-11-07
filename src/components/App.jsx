@@ -36,11 +36,14 @@ export default function App ()
     setSelectedId(null);
   }
 
-  function handlOnAddWatched (newWatched)
+  function handlOnAddWatched (movie)
   {
-    setWatched(watched => [
-      ...watched.filter(curWatched => curWatched.imdbID !== newWatched.imdbID),
-      newWatched]);
+    setWatched(watched => [...watched, movie]);
+  }
+
+  function handleDeleteWatched (id)
+  {
+    setWatched(watched => watched.filter(movie => movie.imdbID !== id));
   }
 
   useEffect(
@@ -108,7 +111,10 @@ export default function App ()
               />
               : <>
                 <WatchedSummary watched={watched} />
-                <WatchedMoviesList watched={watched} />
+                <WatchedMoviesList
+                  watched={watched}
+                  onDeleteWatched={handleDeleteWatched}
+                />
               </>
           }
         </Box>
