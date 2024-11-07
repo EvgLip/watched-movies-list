@@ -9,7 +9,7 @@ import MovieList from "./MovieList";
 import WatchedSummary from "./WatchedSummary";
 import WatchedMoviesList from "./WatchedMoviesList";
 // import { tempMovieData } from '../data/tempMovieData';
-import { tempWatchedData } from '../data/tempWatchedData';
+// import { tempWatchedData } from '../data/tempWatchedData';
 import Loader from "./Loader";
 import ErrorMassage from "./ErrorMassage";
 import MovieDetails from "./MovieDetails";
@@ -21,7 +21,7 @@ export default function App ()
 {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedId, setSelectedId] = useState('');
@@ -34,6 +34,13 @@ export default function App ()
   function handleOnClearDetails ()
   {
     setSelectedId(null);
+  }
+
+  function handlOnAddWatched (newWatched)
+  {
+    setWatched(watched => [
+      ...watched.filter(curWatched => curWatched.imdbID !== newWatched.imdbID),
+      newWatched]);
   }
 
   useEffect(
@@ -82,7 +89,7 @@ export default function App ()
       </NavBar>
 
       <Main>
-        <Box classExt="btn-left">
+        <Box >
           {isLoading && <Loader />}
           {!isLoading && !error && <MovieList
             movies={movies}
@@ -95,7 +102,9 @@ export default function App ()
             selectedId
               ? <MovieDetails
                 selectedId={selectedId}
+                watched={watched}
                 onClearDetails={handleOnClearDetails}
+                onAddWatched={handlOnAddWatched}
               />
               : <>
                 <WatchedSummary watched={watched} />

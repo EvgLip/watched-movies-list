@@ -7,23 +7,24 @@ import Loader from "./Loader";
 import ErrorMassage from "./ErrorMassage";
 import { FaRegArrowAltCircleLeft } from "react-icons/fa";
 
-export default function MovieDetails ({ selectedId, onClearDetails })
+export default function MovieDetails ({ selectedId, watched, onClearDetails, onAddWatched })
 {
   const [movieDetails, setMovieDetails] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rating, setRating] = useState(0);
 
   const {
-    Title: title,
-    Year: year,
-    Poster: poster,
-    Runtime: runtime,
+    Title,
+    Year,
+    Poster,
+    Runtime,
     imdbRating,
-    Plot: plot,
-    Released: released,
-    Actors: actors,
-    Director: director,
-    Genre: genre,
+    Plot,
+    Released,
+    Actors,
+    Director,
+    Genre,
   } = movieDetails;
 
   useEffect(function ()
@@ -57,8 +58,26 @@ export default function MovieDetails ({ selectedId, onClearDetails })
 
   }, [selectedId]);
 
-  console.log('movieDetails ', movieDetails);
-  console.log('err ', error);
+  function handlOnAddWatched ()
+  {
+    const newWatchedMovie = {
+      imdbID: selectedId,
+      Title,
+      Year,
+      Poster,
+      Runtime: Number(Runtime.split(' ').at(0)),
+      imdbRating: Number(imdbRating),
+      userRating: rating,
+    };
+
+    onAddWatched(newWatchedMovie);
+    onClearDetails();
+  }
+
+  function hendleDefaultRating ()
+  {
+    return watched.find(curWatched => curWatched.imdbID === selectedId)?.userRating ?? 0;
+  }
 
   return (
     <div className="details">
@@ -70,13 +89,13 @@ export default function MovieDetails ({ selectedId, onClearDetails })
             <button className="btn-back" onClick={onClearDetails}>
               <FaRegArrowAltCircleLeft />
             </button>
-            <img src={poster} alt={`Poster of ${movieDetails} movie`} />
+            <img src={Poster} alt={`Poster of ${movieDetails} movie`} />
             <div className="details-overview">
-              <h2>{title}</h2>
+              <h2>{Title}</h2>
               <p>
-                {released} &bull; {runtime}
+                {Released} &bull; {Runtime}
               </p>
-              <p>{genre}</p>
+              <p>{Genre}</p>
               <p>
                 <span>⭐️</span>
                 {imdbRating} IMDb rating
@@ -88,12 +107,23 @@ export default function MovieDetails ({ selectedId, onClearDetails })
             <div className="rating">
               <StarRating
                 maxRating={10}
+                defaultRating={hendleDefaultRating}
                 size={22}
+                onChangeReting={setRating}
               />
+              {
+                rating > 0 &&
+                <button
+                  className="btn-add"
+                  onClick={handlOnAddWatched}
+                >
+                  + Add to list
+                </button>
+              }
             </div>
-            <p><em>{plot}</em></p>
-            <p>Starring {actors}</p>
-            <p>Directed by {director}</p>
+            <p><em>{Plot}</em></p>
+            <p>Starring {Actors}</p>
+            <p>Directed by {Director}</p>
           </section>
         </>
       }
