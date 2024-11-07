@@ -49,6 +49,7 @@ export default function App ()
   useEffect(
     function ()
     {
+      const controller = new AbortController();
       async function fetcMovies ()
       {
         try
@@ -56,17 +57,25 @@ export default function App ()
           setIsLoading(true);
           setError('');
 
-          const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
+          );
           if (!res.ok) throw new Error(`${res.status}. ${res.statusText}`);
 
           const data = await res.json();
           if (data.Response === 'False') throw new Error(`Фильм не найден. (Причина: ${data?.Error})`);
 
           setMovies(data.Search);
+          setError('');
         }
         catch (err) 
         {
-          setError(err.message);
+          if (err.name !== 'AbortError') 
+          {
+            console.log(err.massage);
+            setError(err.message);
+          }
         }
         finally 
         {
@@ -74,13 +83,20 @@ export default function App ()
         }
       };
 
+      handleOnClearDetails();
       if (query.length < 3)
       {
         setMovies([]);
         setError('');
         return;
       }
+
       fetcMovies();
+
+      return function ()
+      {
+        controller.abort();
+      };
 
     }, [query]);
 

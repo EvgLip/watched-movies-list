@@ -30,26 +30,39 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
     Genre,
   } = movieDetails;
 
+  //запрос на выборку данных о выбранно фильме
   useEffect(function ()
   {
+    const controller = new AbortController();
+
     async function getMovieDetails ()
     {
+
       try
       {
         setIsLoading(true);
         setError('');
 
-        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`,
+          { signal: controller.signal }
+        );
         if (!res.ok) throw new Error(`${res.status}. ${res.statusText}`);
 
         const data = await res.json();
         if (data.Response === 'False') throw new Error(`Фильм не найден. (Причина: ${data?.Error})`);
 
         setMovieDetails(data);
+        setError('');
       }
       catch (err) 
       {
-        setError(err.message);
+
+        if (err.name !== 'AbortError') 
+        {
+          console.log(err.massage);
+          setError(err.message);
+        }
       }
       finally 
       {
@@ -59,8 +72,14 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
 
     getMovieDetails();
 
+    return function ()
+    {
+      controller.abort();
+    };
+
   }, [selectedId]);
 
+  //замена заголвка вкладки
   useEffect(
     function ()
     {
@@ -70,10 +89,23 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
       return function ()
       {
         document.title = 'Use Popcorn';
-        console.log('cleaner ', Title);
       };
     }, [Title]
   );
+
+  useEffect(function ()
+  {
+    function espFn (e)
+    {
+      if (e.code === 'Escape') onClearDetails();
+    }
+    document.addEventListener('keydown', espFn);
+
+    return function ()
+    {
+      document.removeEventListener('keydown', espFn);
+    };
+  }, [onClearDetails]);
 
   function handlOnAddWatched ()
   {
@@ -86,7 +118,6 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
       imdbRating: imdbRating,
       userRating: rating,
     };
-    console.log(newWatchedMovie);
 
     onAddWatched(newWatchedMovie);
     onClearDetails();
