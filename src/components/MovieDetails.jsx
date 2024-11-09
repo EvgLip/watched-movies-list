@@ -1,20 +1,22 @@
 // детали фильма
-
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KEY } from "../data/key";
 import StarRating from "./StarRating";
 import Loader from "./Loader";
 import ErrorMassage from "./ErrorMassage";
 import { FaRegArrowAltCircleLeft } from "react-icons/fa";
+////////////////////////////////
 
 export default function MovieDetails ({ selectedId, watched, onClearDetails, onAddWatched })
 {
   const [movieDetails, setMovieDetails] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [rating, setRating] = useState(0);
+  const [userRating, setUserRating] = useState(0);
 
-  const isWatched = watched.some(cur => cur.imdbID === selectedId);
+  const countRatingRef = useRef(0);
+
+  const isWatched = watched.some(movie => movie.imdbID === selectedId);
   const watchedUserRating = watched.find(movie => movie.imdbID === selectedId)?.userRating;
 
   const {
@@ -60,7 +62,6 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
 
         if (err.name !== 'AbortError') 
         {
-          console.log(err.massage);
           setError(err.message);
         }
       }
@@ -92,20 +93,26 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
       };
     }, [Title]
   );
-
+  // обработчик события для ESC
   useEffect(function ()
   {
-    function espFn (e)
+    function listenESC (e)
     {
+      console.log('esc');
       if (e.code === 'Escape') onClearDetails();
     }
-    document.addEventListener('keydown', espFn);
+    document.addEventListener('keydown', listenESC);
 
-    return function ()
-    {
-      document.removeEventListener('keydown', espFn);
-    };
+    return () => document.removeEventListener('keydown', listenESC);
   }, [onClearDetails]);
+
+  // подсчет сколько раз пользователь
+  // менял рейтинговые решения
+  useEffect(function ()
+  {
+    if (userRating)
+      countRatingRef.current++;
+  }, [userRating]);
 
   function handlOnAddWatched ()
   {
@@ -116,7 +123,8 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
       Poster,
       Runtime: Runtime.split(' ').at(0),
       imdbRating: imdbRating,
-      userRating: rating,
+      userRating: userRating,
+      countRatingDecisions: countRatingRef.current,
     };
 
     onAddWatched(newWatchedMovie);
@@ -155,10 +163,10 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
                   <StarRating
                     maxRating={10}
                     size={22}
-                    onChangeReting={setRating}
+                    onChangeReting={setUserRating}
                   />
                   {
-                    rating > 0 &&
+                    userRating > 0 &&
                     <button
                       className="btn-add"
                       onClick={handlOnAddWatched}

@@ -19,9 +19,16 @@ import { KEY } from "../data/key";
 
 export default function App ()
 {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(
+    function ()
+    {
+      const storedValue = localStorage.getItem('watched');
+      return JSON.parse(storedValue);
+    }
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedId, setSelectedId] = useState('');
@@ -39,6 +46,10 @@ export default function App ()
   function handlOnAddWatched (movie)
   {
     setWatched(watched => [...watched, movie]);
+    //сохранение в localStorge перенесено в useEffect
+    //здесь watched имеет устаревшее значение - оно обновиться при
+    //следующем рендере
+    // localStorage.setItem('watched', JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched (id)
@@ -46,6 +57,8 @@ export default function App ()
     setWatched(watched => watched.filter(movie => movie.imdbID !== id));
   }
 
+  //выполнение запросов на выборку фильмов по условию из
+  //input Serch
   useEffect(
     function ()
     {
@@ -73,7 +86,6 @@ export default function App ()
         {
           if (err.name !== 'AbortError') 
           {
-            console.log(err.massage);
             setError(err.message);
           }
         }
@@ -99,6 +111,12 @@ export default function App ()
       };
 
     }, [query]);
+
+  //помещение watched в localStorage
+  useEffect(function ()
+  {
+    localStorage.setItem('watched', JSON.stringify(watched));
+  }, [watched]);
 
   return (
     <>
