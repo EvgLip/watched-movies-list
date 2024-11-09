@@ -1,10 +1,11 @@
 // детали фильма
 import { useEffect, useRef, useState } from "react";
-import { KEY } from "../data/key";
+import { KEY } from "../data/keyForFetch";
 import StarRating from "./StarRating";
 import Loader from "./Loader";
 import ErrorMassage from "./ErrorMassage";
 import { FaRegArrowAltCircleLeft } from "react-icons/fa";
+import { useKeyEffect } from "./hooks/useKeyEffect";
 ////////////////////////////////
 
 export default function MovieDetails ({ selectedId, watched, onClearDetails, onAddWatched })
@@ -93,18 +94,9 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
       };
     }, [Title]
   );
-  // обработчик события для ESC
-  useEffect(function ()
-  {
-    function listenESC (e)
-    {
-      console.log('esc');
-      if (e.code === 'Escape') onClearDetails();
-    }
-    document.addEventListener('keydown', listenESC);
 
-    return () => document.removeEventListener('keydown', listenESC);
-  }, [onClearDetails]);
+  // обработчик события для ESC
+  useKeyEffect('Escape', onClearDetails);
 
   // подсчет сколько раз пользователь
   // менял рейтинговые решения
@@ -130,7 +122,6 @@ export default function MovieDetails ({ selectedId, watched, onClearDetails, onA
     onAddWatched(newWatchedMovie);
     onClearDetails();
   }
-
 
   return (
     <div className="details">
