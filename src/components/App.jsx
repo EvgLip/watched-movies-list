@@ -20,32 +20,34 @@ export default function App ()
   // const [watched, setWatched] = useState([]);
   const [watched, setWatched] = useLocalStorageState([], 'watched');
   const [selectedId, setSelectedId] = useState('');
+  //кастомный хук для извлечения данных
+  const { movies, isLoading, error } = useFetchMovie(query, handleOnClearDetails);
 
+  //выбор фильма из списка запроса (левый список) 
+  //для запроса на детальное описание (правая часть UI)
   function handleOnSelectMovie (id)
   {
     setSelectedId(curId => curId === id ? null : id);
   }
-
+  //очистка окна детализации фильма (правая часть UI)
   function handleOnClearDetails ()
   {
     setSelectedId(null);
   }
-
+  //добавление фильма в список просмотренных
   function handlOnAddWatched (movie)
   {
     setWatched(watched => [...watched, movie]);
-    //сохранение в localStorge перенесено в useEffect
+    //сохранение в localStorge перенесено в useLocalStorageState
     //здесь watched имеет устаревшее значение - оно обновиться при
     //следующем рендере
     // localStorage.setItem('watched', JSON.stringify([...watched, movie]));
   }
-
+  //удаление фильма из списка просмотренных
   function handleDeleteWatched (id)
   {
     setWatched(watched => watched.filter(movie => movie.imdbID !== id));
   }
-
-  const { movies, isLoading, error } = useFetchMovie(query, handleOnClearDetails);
 
   return (
     <>
